@@ -9,23 +9,24 @@ upstream = int(sys.argv[1])
 
 def getUpstreamCDS(filename):
 
+    CDSRecordList = []
 # reads in a gbk and creates a Seqrecordord object
     for record in SeqIO.parse(filename, "genbank"):
         
-        CDSRecordList = []
+        
         
         if record.features:
             for feature in record.features:
                 if feature.type == "CDS":
                     cds_location=feature.location
                     start=cds_location.start.position
-                    print(feature)
                     upstream_cds = SeqFeature(FeatureLocation(start-upstream, start))
+                    
                     CDSRecordList.append(upstream_cds.extract(record))
                     
                     
                     
-        SeqIO.write(CDSRecordList, filename+"CDS.fasta", "fasta")
+    SeqIO.write(CDSRecordList, filename+"CDS.fasta", "fasta")
 
 
 #creates a list of the files in this directory
