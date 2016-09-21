@@ -19,9 +19,8 @@ def getUpstreamCDS(filename):
                 if feature.type == "CDS":
                     cds_location=feature.location
                     start=cds_location.start.position
-                    
+                    print(feature)
                     upstream_cds = SeqFeature(FeatureLocation(start-upstream, start))
-                    
                     CDSRecordList.append(upstream_cds.extract(record))
                     
                     
@@ -30,7 +29,7 @@ def getUpstreamCDS(filename):
 
 
 #creates a list of the files in this directory
-directory = "biopython-scripts/viralgbk/"
+directory = "/home/ubuntu/workspace/biopython-scripts/"
 listing = os.listdir(directory)
 
 #loops over the list of files
