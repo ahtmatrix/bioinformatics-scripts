@@ -3,23 +3,25 @@ import os
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
-#Usage
-#python [FULL PATH OF ExtractedUstreamCDS.py] ["fasta" or "genbank"] [FULL PATH OF GBK FILES TO EXTRACT]
+# Usage
+# python [FULL PATH OF ExtractedUstreamCDS.py] ["fasta" or "genbank"]
+# [FULL PATH OF GBK FILES TO EXTRACT]
 
-#to combine multiple .gbk files into 1 gbk
+# to combine multiple .gbk files into 1 gbk
 #   navigate to directory containing gbk files
 #   cat *.gbk > filename.gbk
 
-#creates a folder for the extracted sequences
+# creates a folder for the extracted sequences
 if not os.path.exists("extraced_seq"):
     os.makedirs("extraced_seq")
 
-#either fasta or genbank
+# either fasta or genbank
 output_filetype = sys.argv[1]
 rawdata_location = sys.argv[2]
 
+
 def get_upstream_cds(fullpath, filename):
-    print "Working on "+files+"..."
+    print "Working on " + files + "..."
 
     extracted_cds_list = []
     # reads in a gbk and creates a Seqrecordord object
@@ -31,26 +33,24 @@ def get_upstream_cds(fullpath, filename):
                     start = cds_location.start.position
                     upstream_cds = SeqFeature(FeatureLocation(0, start))
                     extracted_cds_list.append(upstream_cds.extract(record))
-                    #translate to double check  ?? WHy?
+                    # translate to double check  ?? WHy?
     if output_filetype == "fasta":
-        SeqIO.write(extracted_cds_list, filename+".CDS.fasta", output_filetype)
+        SeqIO.write(extracted_cds_list, filename +
+                    ".CDS.fasta", output_filetype)
     elif output_filetype == "genbank":
-        SeqIO.write(extracted_cds_list, filename+".CDS.gbk", output_filetype)
+        SeqIO.write(extracted_cds_list, filename + ".CDS.gbk", output_filetype)
     else:
         print "use either 'fasta' or 'genbank' in first argument"
-    print "Done with "+files+"..."
+    print "Done with " + files + "..."
 
-#creates a list of the files in this directory
+# creates a list of the files in this directory
 raw_datadir_listing = os.listdir(rawdata_location)
-
-#loops over the list of files
+# loops over the list of files
 for files in raw_datadir_listing:
     if files.endswith('.gbk'):
         full_path = os.path.join(rawdata_location, files)
         filename = os.path.splitext(files)[0]
-        
         get_upstream_cds(full_path, filename)
-
 
 
 # finished_listing = os.listdir(directory)
