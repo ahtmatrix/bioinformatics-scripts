@@ -31,10 +31,10 @@ def get_upstream_cds(fullpath, filename):
                 if feature.type == "CDS":
                     cds_location = feature.location
                     start = cds_location.start.position
-                    upstream_cds = SeqFeature(FeatureLocation(0, start))
-                    extracted_cds_list.append(upstream_cds.extract(record))
+                    end = cds_location.end.position
+                    cds_feature = SeqFeature(FeatureLocation(start, end))
+                    extracted_cds_list.append(cds_feature.extract(record))
                     # translate to double check  ?? WHy?
-                    
     if output_filetype == "fasta":
         SeqIO.write(extracted_cds_list, filename +
                     ".CDS.fasta", output_filetype)
