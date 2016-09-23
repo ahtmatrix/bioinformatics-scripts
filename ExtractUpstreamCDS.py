@@ -11,13 +11,8 @@ from Bio.SeqFeature import SeqFeature, FeatureLocation
 #   navigate to directory containing gbk files
 #   cat *.gbk > filename.gbk
 
-# creates a folder for the extracted sequences
-if not os.path.exists("extraced_seq"):
-    os.makedirs("extraced_seq")
-
 # either fasta or genbank
 output_filetype = sys.argv[1]
-rawdata_location = sys.argv[2]
 
 
 def get_upstream_cds(fullpath, filename):
@@ -45,11 +40,11 @@ def get_upstream_cds(fullpath, filename):
     print "Done with " + files + "..."
 
 # creates a list of the files in this directory
-raw_datadir_listing = os.listdir(rawdata_location)
+raw_datadir_listing = os.listdir(os.getcwd())
 # loops over the list of files
 for files in raw_datadir_listing:
     if files.endswith('.gbk'):
-        full_path = os.path.join(rawdata_location, files)
+        full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
         get_upstream_cds(full_path, filename)
 
