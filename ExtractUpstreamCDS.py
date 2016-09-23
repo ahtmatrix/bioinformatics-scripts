@@ -13,8 +13,11 @@ from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # either fasta or genbank
 output_filetype = sys.argv[1]
+num_bp_upstreamcds = int(sys.argv[2])
 
 
+    
+    
 def get_upstream_cds(fullpath, filename):
     print "Working on " + files + "..."
 
@@ -26,8 +29,14 @@ def get_upstream_cds(fullpath, filename):
                 if feature.type == "CDS":
                     cds_location = feature.location
                     start = cds_location.start.position
-                    upstream_cds = SeqFeature(FeatureLocation(0, start))
-                    extracted_cds_list.append(upstream_cds.extract(record))
+                    upstream_cds = SeqFeature(FeatureLocation(start-num_bp_upstreamcds, start))
+                    
+                    extracted_upstream_cds = upstream_cds.extract(record)
+                    
+                    if len(extracted_upstream_cds.seq) != num_bp_upstreamcds:
+                        print "upstream cds length is too short = " + str(len(extracted_upstream_cds.seq))
+                    else:
+                        extracted_cds_list.append(extracted_upstream_cds)
                     # translate to double check  ?? WHy?
                     
     if output_filetype == "fasta":
@@ -38,6 +47,8 @@ def get_upstream_cds(fullpath, filename):
     else:
         print "use either 'fasta' or 'genbank' in first argument"
     print "Done with " + files + "..."
+    
+    return
 
 # creates a list of the files in this directory
 raw_datadir_listing = os.listdir(os.getcwd())
