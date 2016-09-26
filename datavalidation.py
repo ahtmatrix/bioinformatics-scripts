@@ -12,9 +12,7 @@ from difflib import SequenceMatcher
 #   navigate to directory containing gbk files
 #   cat *.gbk > filename.gbk
 
-# either fasta or genbank
-output_filetype = sys.argv[1]
-num_bp_upstreamcds = int(sys.argv[2])
+num_bp_upstreamcds = int(sys.argv[1])
 
 
 
@@ -32,6 +30,9 @@ def similar(a, b):
     
 def get_upstream_cds(fullpath, filename):
     #rint "Working on " + files + "..."
+    text_file = open("Output.csv", "a")
+    text_file.write("record ID," + "protein ID,"+"gbk protein," + "translated protein," + "similarity %")
+    text_file.write("\n")
     
     extracted_cds_list = []
     # reads in a gbk and creates a Seqrecordord object
@@ -46,23 +47,24 @@ def get_upstream_cds(fullpath, filename):
                     
                     
                     if translated_protein != cds_to_protein:
-                        print similar(translated_protein, cds_to_protein)
+                        
+                        
+                        similarity_ratio = str(similar(translated_protein, cds_to_protein))
+                        
+                        
 
-                        cds = feature.extract(record)
+                        # cds = feature.extract(record)
                     
-                        extracted_cds_list.append(cds)
-    
+                        # extracted_cds_list.append(cds)
+                        print similarity_ratio
+                        
+                        
 
-                    
-    if output_filetype == "fasta":
-        SeqIO.write(extracted_cds_list, filename +
-                    ".CDS.fasta", output_filetype)
-    elif output_filetype == "genbank":
-        SeqIO.write(extracted_cds_list, filename + ".CDS.gbk", output_filetype)
-    else:
-        print "use either 'fasta' or 'genbank' in first argument"
-    #print "Done with " + files + "..."
-    
+                        text_file.write(record.id +"," +str(feature.qualifiers.get('protein_id')).strip('\'[]')+","+ translated_protein + "," + cds_to_protein + "," + similarity_ratio)
+                        text_file.write("\n")
+                
+    text_file.close()
+
     return
 
 # creates a list of the files in this directory
