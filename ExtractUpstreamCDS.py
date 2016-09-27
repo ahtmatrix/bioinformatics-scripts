@@ -3,8 +3,8 @@ import os
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio import pairwise2
-import pdb
-
+import warnings
+from Bio import BiopythonWarning
 
 # Usage
 # python ExtractUpstreamCDS.py [number of bases upstream to cut]
@@ -14,18 +14,21 @@ import pdb
 # cat *.gbk > filename.gbk
 
 # python -m pdb -Werror myprogram.py
-
+warnings.filterwarnings('error')
 num_bp_upstreamcds = int(sys.argv[1])
 
 def validate_cds(record, feature):
     
-    saved_record = record
-    saved_feature = feature
+    try:
+        
+        protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
+        
+        cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
+    except BiopythonWarning:
+        print record.id
+        
     
-    protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
-    
-    cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
-    
+        
     
     # if protein_in_file != cds_to_protein:
     #     print "oh snap"
