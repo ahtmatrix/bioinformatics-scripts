@@ -45,8 +45,7 @@ def get_upstream_cds(fullpath, filename):
                         extracted_cds_list.append(extracted_upstream_cds)
 
     if output_filetype == "fasta":
-        SeqIO.write(extracted_cds_list, filename +
-                    ".CDS.fasta", output_filetype)
+        SeqIO.write(extracted_cds_list, filename +".CDS.fasta", output_filetype)
     elif output_filetype == "genbank":
         SeqIO.write(extracted_cds_list, filename + ".CDS.gbk", output_filetype)
     else:
