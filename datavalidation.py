@@ -2,7 +2,7 @@ import sys
 import os
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
-from difflib import SequenceMatcher
+from Bio import pairwise2
 
 # Usage
 # python datavalidation.py
@@ -22,6 +22,9 @@ def get_upstream_cds(fullpath, filename):
                     
                     
                     if translated_protein != cds_to_protein:
+                        
+                        alignment = pairwise2.align.globalxx(translated_protein, cds_to_protein, one_alignment_only=True)
+                        print(pairwise2.format_alignment(*alignment[0]))
                         
     return
 
