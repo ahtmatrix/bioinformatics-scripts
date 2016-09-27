@@ -66,20 +66,20 @@ def get_upstream_cds(fullpath, filename):
                     
                     extracted_upstream_cds = upstream_cds.extract(record)
                     
-                    # if len(extracted_upstream_cds.seq) != num_bp_upstreamcds:
-                    #     print "upstream cds length is too short = " + str(len(extracted_upstream_cds.seq))
-                    # else:
-                    #     extracted_cds_list.append(extracted_upstream_cds)
-                    # # translate to double check  ?? WHy?
+                    if len(extracted_upstream_cds.seq) != num_bp_upstreamcds:
+                        print "upstream cds length is too short = " + str(len(extracted_upstream_cds.seq))
+                    else:
+                        extracted_cds_list.append(extracted_upstream_cds)
+                    # translate to double check  ?? WHy?
                     
-    # if output_filetype == "fasta":
-    #     SeqIO.write(extracted_cds_list, filename +
-    #                 ".CDS.fasta", output_filetype)
-    # elif output_filetype == "genbank":
-    #     SeqIO.write(extracted_cds_list, filename + ".CDS.gbk", output_filetype)
-    # else:
-    #     print "use either 'fasta' or 'genbank' in first argument"
-    # #print "Done with " + files + "..."
+    if output_filetype == "fasta":
+        SeqIO.write(extracted_cds_list, filename +
+                    ".CDS.fasta", output_filetype)
+    elif output_filetype == "genbank":
+        SeqIO.write(extracted_cds_list, filename + ".CDS.gbk", output_filetype)
+    else:
+        print "use either 'fasta' or 'genbank' in first argument"
+    #print "Done with " + files + "..."
     
     return
 
