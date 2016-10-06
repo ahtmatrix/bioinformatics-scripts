@@ -13,8 +13,9 @@ from Bio import BiopythonWarning
 # navigate to directory containing gbk files
 # cat *.gbk > filename.gbk
 
-# python -m pdb -Werror myprogram.py
-warnings.filterwarnings('error')
+# python -m pdb -Werror myprogram.py to run and stop pdb at the warning
+# python -Werror -m pdb ExtractUpstreamCDS.py 30
+#warnings.filterwarnings('error')
 num_bp_upstreamcds = int(sys.argv[1])
 
 def validate_cds(record, feature):
@@ -23,15 +24,17 @@ def validate_cds(record, feature):
         
         protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
         
+        #is the problem with 
         cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
+        
+        if protein_in_file != cds_to_protein:
+            print feature.location_ope
+            print "protein check fail: " + record.id +" "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
+        
     except BiopythonWarning:
-        print record.id
+        print record.id +" -->  "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
         
     
-        
-    
-    # if protein_in_file != cds_to_protein:
-    #     print "oh snap"
     #     #alignment = pairwise2.align.globalxx(translated_protein, cds_to_protein, one_alignment_only=True)
         #print(pairwise2.format_alignment(*alignment[0]))
     return
@@ -57,12 +60,15 @@ def get_upstream_cds(fullpath, filename):
             
                     
                     #create a SeqFeature object containing the location of where to extract
+                    
+                    # need to test if its taking + or - 1 off the location
+                    # genbank starts with 1
                     upstream_cds = SeqFeature(FeatureLocation(start-num_bp_upstreamcds, start))
                     
                     extracted_upstream_cds = upstream_cds.extract(record)
                     
                     if len(extracted_upstream_cds.seq) != num_bp_upstreamcds:
-                        asldkfjalksdjflasjdf = 0
+                        continue
                         #print "upstream cds length is too short = " + str(len(extracted_upstream_cds.seq))
                     else:
                         extracted_cds_list.append(extracted_upstream_cds)
