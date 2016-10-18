@@ -1,6 +1,7 @@
 import sys
 import os
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio import pairwise2
 import warnings
@@ -23,27 +24,17 @@ num_bp_upstreamcds = int(sys.argv[1])
 
 
 def validate_cds(record, feature):
+    feature_validity = None
     
     try:
-        
-        # ACG codon for AAV YP_680427.1 will be counted
-        # all sequences that differ by just 1 start codon will be counted
-        
-        #check the start codon
-        #   if start codon only differs by 1 let it through
-        #
-        
-        #for splicing a seq
-        #print feature.extract(record).seq[3::3]
-        
         protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
         #diff extracted CDS compare with FASTA nucleotdie on NCBI
         
         #is the problem with
         cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
-        
-        
-        #may have to reconstruct a Seq object for each extraction
+    
+       
+        #print "protein_check_fail: |" + record.id +"|"+ str(feature.qualifiers.get('transl_except')).strip('\'[]')  +"| " +str(feature.qualifiers.get('note')).strip('\'[]')  + " |"+str(feature.qualifiers.get('protein_id')).strip('\'[]') + "| " + protein_in_file + " |" + cds_to_protein
        
         temp_fix_protein = list(cds_to_protein)
         temp_fix_protein[0] = protein_in_file[0]
@@ -51,17 +42,15 @@ def validate_cds(record, feature):
         fixed_cds_to_protein = "".join(temp_fix_protein)
         
         if fixed_cds_to_protein != protein_in_file:
-            print "protein_check_fail: |" + record.id +"|"+ str(feature.qualifiers.get('transl_except')).strip('\'[]')  +"| " +str(feature.qualifiers.get('note')).strip('\'[]')  + " |"+str(feature.qualifiers.get('protein_id')).strip('\'[]') + "| " + protein_in_file + " |" + cds_to_protein
             
-            # if protein_in_file in cds_to_protein:
-            #     print "protein_in_file is within cds_to_protein"
-    
-    
-    
+            feature_validity = False
+        else:
+            feature_validity = True
+            
     except BiopythonWarning:
         print "Biopythonwarning:" + record.id +" -->  "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')# + " " + protein_in_file
         
-    return
+    return feature_validity
 
 
 def get_upstream_cds(fullpath, filename):
@@ -74,30 +63,34 @@ def get_upstream_cds(fullpath, filename):
         if record.features:
             for feature in record.features:
                 if feature.type == "CDS":
+                    if validate_cds(record, feature) == True:
+                        #get the CDS nucleotide locations
+                        cds_start = feature.location.start.position
+                        cds_end = feature.location.end.position
+                        
                     
-                    validate_cds(record, feature)
-                    
-                    #get the CDS nucleotide locations
-                    cds_location = feature.location
-                    start = cds_location.start.position
-                    end = cds_location.end.position
-            
-                    
-                    #create a SeqFeature object containing the location of where to extract
-                    
-                    # need to test if its taking + or - 1 off the location
-                    # genbank starts with 1
-                    upstream_cds = SeqFeature(FeatureLocation(start-num_bp_upstreamcds, start))
-                    
-                    extracted_upstream_cds = upstream_cds.extract(record)
-                    
-                    if len(extracted_upstream_cds.seq) != num_bp_upstreamcds:
-                        continue
-                        #print "upstream cds length is too short = " + str(len(extracted_upstream_cds.seq))
-                    else:
-                        extracted_cds_list.append(extracted_upstream_cds)
+                        #create a SeqFeature object containing the location of where to extract
+                        # need to test if its taking + or - 1 off the location
+                        # genbank starts with 1
+                        upstream_and_cds            = SeqFeature(FeatureLocation(cds_start-num_bp_upstreamcds, cds_end))
+                        extracted_upstream_and_cds  = upstream_and_cds.extract(record)
+                        
+                        
+                        #only used for length culling
+                        upstream_only               = SeqFeature(FeatureLocation(cds_start-num_bp_upstreamcds, cds_start))
+                        extracted_upstream_only     = upstream_only.extract(record)
+                        
+                        
+                        cds_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
+                        
+                        
+                        if len(extracted_upstream_only.seq) == num_bp_upstreamcds:
+                            
+                            annotated_record = SeqRecord(extracted_upstream_and_cds.seq, extracted_upstream_and_cds.id, description = cds_id)
+                            
+                            extracted_cds_list.append(annotated_record)
 
-        #SeqIO.write(extracted_cds_list, filename +".CDS.fasta", "fasta")
+        SeqIO.write(extracted_cds_list, filename +".CDS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory
