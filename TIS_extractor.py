@@ -37,7 +37,7 @@ def get_TIS(fullpath, filename):
     extracted_TIS_list = []
     
 
-    TIS_coordinates = SeqFeature(FeatureLocation(num_bp_upstreamcds-num_bp_upstream_start, num_bp_upstreamcds+3+num_bp_downstream_start))
+    TIS_coordinates = SeqFeature(FeatureLocation(num_bp_upstreamcds-num_bp_upstream_start, num_bp_upstreamcds+num_bp_downstream_start))
     # reads in a gbk and creates a Seqrecordord object
     for record in SeqIO.parse(fullpath, "fasta"):
         TIS_only_record = TIS_coordinates.extract(record)

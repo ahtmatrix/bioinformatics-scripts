@@ -90,6 +90,7 @@ def get_upstream_cds(fullpath, filename):
                             
                             extracted_cds_list.append(annotated_record)
 
+        #extraction is using the GENBANK protein for all
         SeqIO.write(extracted_cds_list, filename +"_"+str(num_bp_upstreamcds)+"upstream_"+".CDS.fasta", "fasta")
     return
 
