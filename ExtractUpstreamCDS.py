@@ -15,47 +15,52 @@ from Bio import BiopythonWarning
 
 # python -m pdb -Werror myprogram.py to run and stop pdb at the warning
 # python -Werror -m pdb ExtractUpstreamCDS.py 30
-#warnings.filterwarnings('error')
+#turns warnings into errors so it can be caught
+warnings.filterwarnings('error')
+
+
 num_bp_upstreamcds = int(sys.argv[1])
+
 
 def validate_cds(record, feature):
     
     try:
         
-        if str(feature.qualifiers.get('protein_id')).strip('\'[]') == "YP_680427.1":
-        
         # ACG codon for AAV YP_680427.1 will be counted
         # all sequences that differ by just 1 start codon will be counted
-            print 
         
-        
+        #check the start codon
+        #   if start codon only differs by 1 let it through
+        #
         
         #for splicing a seq
         #print feature.extract(record).seq[3::3]
-            
-        # if str(feature.qualifiers.get('protein_id')).strip('\'[]') == "YP_680427.1":
-        #     for x in range(21, 27):
-        #         print "table = " + str(x)
-        #         print "\n"
-        #         print str(feature.extract(record).seq.translate(table = x,to_stop = True))
-        #         print "\n"
         
         protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
         #diff extracted CDS compare with FASTA nucleotdie on NCBI
         
-        #is the problem with 
+        #is the problem with
         cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
         
-    #    if protein_in_file != cds_to_protein:
-            # print feature.location_operator
-    #        print "protein check fail: " + record.id +" "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
         
-    except BiopythonWarning:
-        print record.id +" -->  "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
+        #may have to reconstruct a Seq object for each extraction
+       
+        temp_fix_protein = list(cds_to_protein)
+        temp_fix_protein[0] = protein_in_file[0]
         
+        fixed_cds_to_protein = "".join(temp_fix_protein)
+        
+        if fixed_cds_to_protein != protein_in_file:
+            print "protein_check_fail: |" + record.id +"|"+ str(feature.qualifiers.get('transl_except')).strip('\'[]')  +"| " +str(feature.qualifiers.get('note')).strip('\'[]')  + " |"+str(feature.qualifiers.get('protein_id')).strip('\'[]') + "| " + protein_in_file + " |" + cds_to_protein
+            
+            # if protein_in_file in cds_to_protein:
+            #     print "protein_in_file is within cds_to_protein"
     
-    #     #alignment = pairwise2.align.globalxx(translated_protein, cds_to_protein, one_alignment_only=True)
-        #print(pairwise2.format_alignment(*alignment[0]))
+    
+    
+    except BiopythonWarning:
+        print "Biopythonwarning:" + record.id +" -->  "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')# + " " + protein_in_file
+        
     return
 
 
