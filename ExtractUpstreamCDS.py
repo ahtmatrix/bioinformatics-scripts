@@ -81,16 +81,16 @@ def get_upstream_cds(fullpath, filename):
                         extracted_upstream_only     = upstream_only.extract(record)
                         
                         
-                        cds_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
+                        cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
                         
                         
                         if len(extracted_upstream_only.seq) == num_bp_upstreamcds:
                             
-                            annotated_record = SeqRecord(extracted_upstream_and_cds.seq, extracted_upstream_and_cds.id, description = cds_id)
+                            annotated_record = SeqRecord(extracted_upstream_and_cds.seq, extracted_upstream_and_cds.id, description = "|" + cds_protein_id +"|")
                             
                             extracted_cds_list.append(annotated_record)
 
-        SeqIO.write(extracted_cds_list, filename +".CDS.fasta", "fasta")
+        SeqIO.write(extracted_cds_list, filename +"_"+str(num_bp_upstreamcds)+"upstream_"+".CDS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory
