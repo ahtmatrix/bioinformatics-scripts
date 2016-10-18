@@ -22,14 +22,33 @@ def validate_cds(record, feature):
     
     try:
         
+        if str(feature.qualifiers.get('protein_id')).strip('\'[]') == "YP_680427.1":
+        
+        # ACG codon for AAV YP_680427.1 will be counted
+        # all sequences that differ by just 1 start codon will be counted
+            print 
+        
+        
+        
+        #for splicing a seq
+        #print feature.extract(record).seq[3::3]
+            
+        # if str(feature.qualifiers.get('protein_id')).strip('\'[]') == "YP_680427.1":
+        #     for x in range(21, 27):
+        #         print "table = " + str(x)
+        #         print "\n"
+        #         print str(feature.extract(record).seq.translate(table = x,to_stop = True))
+        #         print "\n"
+        
         protein_in_file = str(feature.qualifiers.get('translation', 'no_translation')).strip('\'[]')
+        #diff extracted CDS compare with FASTA nucleotdie on NCBI
         
         #is the problem with 
         cds_to_protein = str(feature.extract(record).seq.translate(to_stop = True))
         
-        if protein_in_file != cds_to_protein:
-            print feature.location_ope
-            print "protein check fail: " + record.id +" "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
+    #    if protein_in_file != cds_to_protein:
+            # print feature.location_operator
+    #        print "protein check fail: " + record.id +" "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
         
     except BiopythonWarning:
         print record.id +" -->  "+ str(feature.qualifiers.get('protein_id')).strip('\'[]')
