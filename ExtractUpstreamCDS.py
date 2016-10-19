@@ -17,6 +17,10 @@ from Bio import BiopythonWarning
 # python -m pdb -Werror myprogram.py to run and stop pdb at the warning
 # python -Werror -m pdb ExtractUpstreamCDS.py 30
 #turns warnings into errors so it can be caught
+
+
+#grep '>' [filename] | wc -l
+
 warnings.filterwarnings('error')
 
 
@@ -90,8 +94,8 @@ def get_upstream_cds(fullpath, filename):
                             
                             extracted_cds_list.append(annotated_record)
 
-        #extraction is using the GENBANK protein for all
-        SeqIO.write(extracted_cds_list, filename +"_"+str(num_bp_upstreamcds)+"upstream_"+".CDS.fasta", "fasta")
+    #extraction is using the GENBANK protein for all
+    SeqIO.write(extracted_cds_list, filename +"_"+str(num_bp_upstreamcds)+"upstream_"+".CDS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory

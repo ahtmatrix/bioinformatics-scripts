@@ -20,8 +20,6 @@ import re
 #turns warnings into errors so it can be caught
 warnings.filterwarnings('error')
 
-
-
 #positive number upstream of start codon 
 num_bp_upstream_start = int(sys.argv[1])
 
@@ -46,8 +44,9 @@ def get_TIS(fullpath, filename):
         #annotated_TIS_only_record = SeqRecord(TIS_only_record.seq, TIS_only_record.id, description = "|" + cds_protein_id +"|")
         
         extracted_TIS_list.append(TIS_only_record)
+    
         
-        SeqIO.write(extracted_TIS_list, filename +".TIS.fasta", "fasta")
+    SeqIO.write(extracted_TIS_list, filename +".TIS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory
