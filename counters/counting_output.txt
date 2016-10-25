@@ -1,0 +1,27 @@
+from grep
+
+viral_30upstream_.CDS.TIS.fasta record count = 
+2528
+viral_30upstream_.CDS.fasta record count = 
+2528
+rna_30upstream_.CDS.TIS.fasta record count = 
+104360
+rna_30upstream_.CDS.fasta record count = 
+104360
+rna.gbk record count = 
+176432
+viral.gbk record count = 
+196
+
+
+
+
+
+from count.py
+
+viral_30upstream_.CDS.TIS record count= 2528
+viral_30upstream_.CDS record count= 2528
+rna record count= 176426
+rna_30upstream_.CDS record count= 104360
+rna_30upstream_.CDS.TIS record count= 104360
+viral record count= 196
