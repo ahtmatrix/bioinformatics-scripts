@@ -17,13 +17,13 @@ import re
 
 # python -m pdb -Werror myprogram.py to run and stop pdb at the warning
 # python -Werror -m pdb ExtractUpstreamCDS.py 30
-#turns warnings into errors so it can be caught
+# turns warnings into errors so it can be caught
 warnings.filterwarnings('error')
 
-#positive number upstream of start codon 
+# positive number upstream of start codon
 num_bp_upstream_start = int(sys.argv[1])
 
-#positive number downstream of start codon
+# positive number downstream of start codon
 num_bp_downstream_start = int(sys.argv[2])
 
 
@@ -31,22 +31,21 @@ def get_TIS(fullpath, filename):
 
     list_of_numbers_in_filename = re.findall('\d+', filename)
     num_bp_upstreamcds = int(list_of_numbers_in_filename[0])
-    
-    extracted_TIS_list = []
-    
 
-    TIS_coordinates = SeqFeature(FeatureLocation(num_bp_upstreamcds-num_bp_upstream_start, num_bp_upstreamcds+num_bp_downstream_start))
+    extracted_TIS_list = []
+
+    TIS_coordinates = SeqFeature(FeatureLocation(
+        num_bp_upstreamcds - num_bp_upstream_start, num_bp_upstreamcds + num_bp_downstream_start))
     # reads in a gbk and creates a Seqrecordord object
     for record in SeqIO.parse(fullpath, "fasta"):
         TIS_only_record = TIS_coordinates.extract(record)
-        
 
         #annotated_TIS_only_record = SeqRecord(TIS_only_record.seq, TIS_only_record.id, description = "|" + cds_protein_id +"|")
-        
+
         extracted_TIS_list.append(TIS_only_record)
-    
-        
-    SeqIO.write(extracted_TIS_list, filename +".TIS.fasta", "fasta")
+
+    SeqIO.write(extracted_TIS_list, "extracted_TIS_" +
+                filename + ".TIS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory
