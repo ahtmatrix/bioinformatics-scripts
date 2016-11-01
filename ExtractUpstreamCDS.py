@@ -97,7 +97,7 @@ def get_upstream_cds(fullpath, filename):
                         if len(extracted_upstream_only.seq) == num_bp_upstreamcds:
 
                             annotated_record = SeqRecord(
-                                extracted_upstream_and_cds.seq, extracted_upstream_and_cds.id, description="|" + cds_protein_id + "|")
+                                extracted_upstream_and_cds.seq, extracted_upstream_and_cds.name, description="|" + cds_protein_id + "|")
 
                             extracted_cds_list.append(annotated_record)
 
@@ -115,3 +115,7 @@ for files in raw_datadir_listing:
         full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
         get_upstream_cds(full_path, filename)
+
+
+#negative control
+#scramble CDS to give random noise
