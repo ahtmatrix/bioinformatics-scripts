@@ -115,7 +115,3 @@ for files in raw_datadir_listing:
         full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
         get_upstream_cds(full_path, filename)
-
-
-#negative control
-#scramble CDS to give random noise
