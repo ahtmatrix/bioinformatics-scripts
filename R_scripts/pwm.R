@@ -36,13 +36,53 @@ human.cons   = consensusString(human.kozak)
 human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
 viral_raw = readDNAStringSet('viral_30upstream_.CDS.fasta')
-rna_raw = readDNAStringSet('rna_30upstream_.CDS.fasta')
+#rna_raw = readDNAStringSet('rna_30upstream_.CDS.fasta')
 
-viral_raw[1]
 
-# for everything do this
+#loop through ever single element
+d.dataframe = NULL
 
-print(PWMscoreStartingAt(human.pwm, viral_raw[[1]], starting.at = 1:))  
+for (i in 1:length(viral_raw)) {
+  # seq_length <- length(viral_raw[[i]])
+  # 
+  # integer.vector <- 1:seq_length
+
+  
+  scores <- PWMscoreStartingAt(human.pwm, viral_raw[[i]], starting.at = 1:99)
+  
+  d.dataframe=cbind(d.dataframe,scores)
+  
+  
+}
+
+
+write.table(d.dataframe, file = "dankmemes.csv")
+
+sd(d.dataframe)
+0.1959341
+
+d.dataframe$means <- rowMeans(d.dataframe, na.rm=TRUE)
+d.dataframe$meanplussd <- (d.dataframe$means + 0.1959341)
+d.dataframe$meanminussd <- (d.dataframe$means - 0.1959341)
+
+plot(1,d.dataframe[1])
+
+
+plot(1:99,d.dataframe[1:99])
+
+colnames(d.dataframe)
+
+ggplot(data = df, aes(x=x, y=val)) + geom_line(aes(colour=variable))
+
+
+
+#gives length of sequence
+print (length(viral_raw[[1]]))
+
+print (viral_raw@ranges@width)
+
+
+
 
 print(slotNames(viral_raw))
 
@@ -51,10 +91,10 @@ getSlots(viral_raw@ranges)
 
 viral_raw@ranges@NAMES
 
-# 
+#
 # for each name in viral_raw
 #   PWMscoreStartingAt(human.pwm, viral_raw$name, starting.at = 1:<user defined length?>
-# 
+#
 
 
 ## Use human PWM to score viral seqs
@@ -69,7 +109,6 @@ outfiles = c('viral_orf_u36.tsv', 'viral_internal_atg.tsv')
 
 
 for (idx in 1:length(seqfiles)) {
-  
   fname = seqfiles[idx]
   print(fname)
   
@@ -94,7 +133,7 @@ for (idx in 1:length(seqfiles)) {
       all.scores = rbind(all.scores, s.scores)
     }
   }
-  pos.names = c(seq(-27, -1, 1), seq(1, 297, 1))
+  pos.names = c(seq(-27,-1, 1), seq(1, 297, 1))
   colnames(all.scores) = pos.names
   rownames(all.scores) = all.scores.rownames
   write.table(all.scores,
@@ -115,7 +154,7 @@ plot(
   type = 'l',
   axes = F
 )
-pos.names = c(seq(-27, -1, 10), seq(1, 297, 10))
+pos.names = c(seq(-27,-1, 10), seq(1, 297, 10))
 axis(side = 1, at = pos.names)
 axis(side = 2, at = seq(0, 1, 0.1))
 #lines(colMeans(internal),col='blue')
