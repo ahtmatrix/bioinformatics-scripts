@@ -1,78 +1,123 @@
 # Our next step is to score translation start sites by translation initiation mechanism.
 #
-# Attached is a sample code that does similar thing but not exactly. Here are the things you should do in your codes:
+# Attached is a sample code that does similar thing but not exactly.
+#Here are the things you should do in your codes:
 # 1. Collect all coding sequences with a bit of 5'UTRs, say 30 bps upstream from ATG.
 # 2. Use viral genes that use scanning mechanism to build a PWM by R's Biostrings package
 #   (google for documentation, there is only one site)
 # 3. Score a sequence by scanning from 5' to 3', including 5'utr & coding region (ORF).
 #  It should produce a score profile where y-axis is the score, x-axis is position.
 #
-# In theory, viral genes using scanning mechanism should show a peak at the annotated translation start site.
+# In theory, viral genes using scanning mechanism should
+# show a peak at the annotated translation start site.
 #  Whereas, viral genes using other mechanisms should not show a peak. Fingers crossed!
 
-
-
-library(ape)
-library(seqinr)
 library(Biostrings)
-library(GenomicFeatures)
-library(GenomicRanges)
-
-library(seqLogo)
-
-library(biomaRt)
-library(genoPlotR)
-library(rentrez)
-
 
 virus = readDNAStringSet('annotated_extracted_TIS_viral_30upstream_.CDS.TIS.fasta')
 virus.kozak = DNAStringSet(virus)
 virus.cons   = consensusString(virus.kozak)
 virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
+#make a pwm of size 13
 human = readDNAStringSet('annotated_extracted_TIS_rna_30upstream_.CDS.TIS.fasta')
 human.kozak = DNAStringSet(human)
 human.cons   = consensusString(human.kozak)
 human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
-viral_raw = readDNAStringSet('viral_30upstream_.CDS.fasta')
+viral_raw = readDNAStringSet('annotated_viral_30upstream_.CDS.fasta')
 #rna_raw = readDNAStringSet('rna_30upstream_.CDS.fasta')
+
+viral.random_raw = readDNAStringSet('random_noise_viral_NOATG.fasta')
+#
+#
+# print(PWMscoreStartingAt(human.pwm, viral.random_raw[[1]], starting.at = 1))
+#
+#
+# #loop through ever single element
+# d.dataframe = NULL
+#
+# print(length(viral.random_raw))
+#
+# for (i in 1:length(viral.random_raw)) {
+#   # seq_length <- length(viral_raw[[i]])
+#   #
+#   # integer.vector <- 1:seq_length
+#
+#   scores <- PWMscoreStartingAt(human.pwm, viral.random_raw[[i]], starting.at = 1:99)
+#
+#   d.dataframe=cbind(d.dataframe,scores)
+#   #
+# }
+#
+#
+#
+#
+# write.table(d.dataframe, file = "random_noise_scores_NOATG.csv")
+#
+#
+
+
+
+
+print(PWMscoreStartingAt(human.pwm, viral_raw[[1]], starting.at = 99))
 
 
 #loop through ever single element
 d.dataframe = NULL
 
+print(length(viral_raw))
+
 for (i in 1:length(viral_raw)) {
   # seq_length <- length(viral_raw[[i]])
-  # 
+  #
   # integer.vector <- 1:seq_length
-
   
-  scores <- PWMscoreStartingAt(human.pwm, viral_raw[[i]], starting.at = 1:99)
-  
-  d.dataframe=cbind(d.dataframe,scores)
+  if (grepl("Scanning", viral_raw@ranges@NAMES[i]) == TRUE){
+    
+    scores <-
+      PWMscoreStartingAt(human.pwm, viral_raw[[i]], starting.at = 1:99)
+    
+    d.dataframe = cbind(d.dataframe, scores)
+      
+  }
   
   
 }
 
 
-write.table(d.dataframe, file = "dankmemes.csv")
 
-sd(d.dataframe)
-0.1959341
+write.table(d.dataframe, file = "scanning_only_viral_scores.csv")
 
-d.dataframe$means <- rowMeans(d.dataframe, na.rm=TRUE)
+
+
+#pick particular virus
+#small group
+#lower sample size
+#12 sequences
+#
+
+#random sequences should expect steady state
+
+#stddev near true ATG should be 0
+
+#starndard devation per row
+
+
+d.dataframe$means <- rowMeans(d.dataframe, na.rm = TRUE)
 d.dataframe$meanplussd <- (d.dataframe$means + 0.1959341)
 d.dataframe$meanminussd <- (d.dataframe$means - 0.1959341)
 
-plot(1,d.dataframe[1])
+plot(1, d.dataframe[1])
 
 
-plot(1:99,d.dataframe[1:99])
+#unifrom
+
+plot(1:99, d.dataframe[1:99])
 
 colnames(d.dataframe)
 
-ggplot(data = df, aes(x=x, y=val)) + geom_line(aes(colour=variable))
+ggplot(data = df, aes(x = x, y = val)) + geom_line(aes(colour = variable))
 
 
 
@@ -123,6 +168,7 @@ for (idx in 1:length(seqfiles)) {
     
     if ((length(s) - ksize + 1) >= max.len) {
       all.scores.rownames = c(all.scores.rownames, names(virus[i]))
+      
       s.scores = c()
       
       for (st in 1:max.len) {
@@ -133,7 +179,7 @@ for (idx in 1:length(seqfiles)) {
       all.scores = rbind(all.scores, s.scores)
     }
   }
-  pos.names = c(seq(-27,-1, 1), seq(1, 297, 1))
+  pos.names = c(seq(-27, -1, 1), seq(1, 297, 1))
   colnames(all.scores) = pos.names
   rownames(all.scores) = all.scores.rownames
   write.table(all.scores,
@@ -154,7 +200,7 @@ plot(
   type = 'l',
   axes = F
 )
-pos.names = c(seq(-27,-1, 10), seq(1, 297, 10))
+pos.names = c(seq(-27, -1, 10), seq(1, 297, 10))
 axis(side = 1, at = pos.names)
 axis(side = 2, at = seq(0, 1, 0.1))
 #lines(colMeans(internal),col='blue')
