@@ -25,69 +25,33 @@ human.kozak = DNAStringSet(human)
 human.cons   = consensusString(human.kozak)
 human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
-viral_raw = readDNAStringSet('annotated_viral_30upstream_.CDS.fasta')
-#rna_raw = readDNAStringSet('rna_30upstream_.CDS.fasta')
+subject.fasta = readDNAStringSet('rna_30upstream_.CDS.fasta')
 
-viral.random_raw = readDNAStringSet('random_noise_viral_NOATG.fasta')
-#
-#
-# print(PWMscoreStartingAt(human.pwm, viral.random_raw[[1]], starting.at = 1))
-#
-#
-# #loop through ever single element
-# d.dataframe = NULL
-#
-# print(length(viral.random_raw))
-#
-# for (i in 1:length(viral.random_raw)) {
-#   # seq_length <- length(viral_raw[[i]])
-#   #
-#   # integer.vector <- 1:seq_length
-#
-#   scores <- PWMscoreStartingAt(human.pwm, viral.random_raw[[i]], starting.at = 1:99)
-#
-#   d.dataframe=cbind(d.dataframe,scores)
-#   #
-# }
-#
-#
-#
-#
-# write.table(d.dataframe, file = "random_noise_scores_NOATG.csv")
-#
-#
-
-
-
-
-print(PWMscoreStartingAt(human.pwm, viral_raw[[1]], starting.at = 99))
-
+print(PWMscoreStartingAt(human.pwm, subject.fasta[[1]], starting.at = 99))
 
 #loop through ever single element
 d.dataframe = NULL
 
-print(length(viral_raw))
+print(length(subject.fasta))
 
-for (i in 1:length(viral_raw)) {
-  # seq_length <- length(viral_raw[[i]])
+for (i in 1:length(subject.fasta)) {
+  # seq_length <- length(subject.fasta[[i]])
   #
   # integer.vector <- 1:seq_length
   
-  if (grepl("Scanning", viral_raw@ranges@NAMES[i]) == TRUE){
-    
-    scores <-
-      PWMscoreStartingAt(human.pwm, viral_raw[[i]], starting.at = 1:99)
-    
-    d.dataframe = cbind(d.dataframe, scores)
-      
-  }
+  #if (grepl("IRES", subject.fasta@ranges@NAMES[i]) == TRUE){
   
+  scores <-
+    PWMscoreStartingAt(human.pwm, subject.fasta[[i]], starting.at = 1:99)
   
+  d.dataframe = cbind(d.dataframe, scores)
+  
+  #  }
 }
 
+#check if sequence in R is the same as in genbank and after Python Extraction
 
-
-write.table(d.dataframe, file = "scanning_only_viral_scores.csv")
+write.table(d.dataframe, file = "human_with_rna.csv")
 
 
 
@@ -122,23 +86,23 @@ ggplot(data = df, aes(x = x, y = val)) + geom_line(aes(colour = variable))
 
 
 #gives length of sequence
-print (length(viral_raw[[1]]))
+print (length(subject.fasta[[1]]))
 
-print (viral_raw@ranges@width)
-
-
+print (subject.fasta@ranges@width)
 
 
-print(slotNames(viral_raw))
 
-str(viral_raw)
-getSlots(viral_raw@ranges)
 
-viral_raw@ranges@NAMES
+print(slotNames(subject.fasta))
+
+str(subject.fasta)
+getSlots(subject.fasta@ranges)
+
+subject.fasta@ranges@NAMES
 
 #
-# for each name in viral_raw
-#   PWMscoreStartingAt(human.pwm, viral_raw$name, starting.at = 1:<user defined length?>
+# for each name in subject.fasta
+#   PWMscoreStartingAt(human.pwm, subject.fasta$name, starting.at = 1:<user defined length?>
 #
 
 
@@ -179,7 +143,7 @@ for (idx in 1:length(seqfiles)) {
       all.scores = rbind(all.scores, s.scores)
     }
   }
-  pos.names = c(seq(-27, -1, 1), seq(1, 297, 1))
+  pos.names = c(seq(-27,-1, 1), seq(1, 297, 1))
   colnames(all.scores) = pos.names
   rownames(all.scores) = all.scores.rownames
   write.table(all.scores,
@@ -200,7 +164,7 @@ plot(
   type = 'l',
   axes = F
 )
-pos.names = c(seq(-27, -1, 10), seq(1, 297, 10))
+pos.names = c(seq(-27,-1, 10), seq(1, 297, 10))
 axis(side = 1, at = pos.names)
 axis(side = 2, at = seq(0, 1, 0.1))
 #lines(colMeans(internal),col='blue')
