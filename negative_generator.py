@@ -27,18 +27,26 @@ def random_chars(size, chars="ATCG"):
         yield ''.join(islice(selection, size))
 
 random_gen_up = random_chars(9)
-random_gen_down = random_chars(1)
+random_gen_down = random_chars(1000)
 
 
 104360
 
 2528
 
-random_SeqRecords=[]
+# random_SeqRecords=[]
+# for i in range(0, 2528):
+#     random_seq = str(next(random_gen_up) + "ATG" + next(random_gen_down))
+#     record = SeqRecord(id = 'random_noise_%i' % (i+1), seq = Seq.Seq(random_seq))
+#     random_SeqRecords.append(record)
+    
+    
+pure_random_SeqRecords=[]
 for i in range(0, 2528):
-    random_seq = str(next(random_gen_up) + "ATG" + next(random_gen_down))
+    random_seq = str(next(random_gen_down))
     record = SeqRecord(id = 'random_noise_%i' % (i+1), seq = Seq.Seq(random_seq))
-    random_SeqRecords.append(record)
+    pure_random_SeqRecords.append(record)
 
 
-SeqIO.write(random_SeqRecords,"random_noise_viral.fasta","fasta")
+
+SeqIO.write(pure_random_SeqRecords,"random_noise_viral.fasta","fasta")
