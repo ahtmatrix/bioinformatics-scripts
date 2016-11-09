@@ -27,10 +27,10 @@ human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
 subject.fasta = readDNAStringSet('rna_30upstream_.CDS.fasta')
 
-print(PWMscoreStartingAt(human.pwm, subject.fasta[[1]], starting.at = 99))
+#print(PWMscoreStartingAt(human.pwm, subject.fasta[[1]], starting.at = 99))
 
 #loop through ever single element
-d.dataframe = NULL
+pwm.score.dataframe = NULL
 
 print(length(subject.fasta))
 
@@ -42,16 +42,16 @@ for (i in 1:length(subject.fasta)) {
   #if (grepl("IRES", subject.fasta@ranges@NAMES[i]) == TRUE){
   
   scores <-
-    PWMscoreStartingAt(human.pwm, subject.fasta[[i]], starting.at = 1:99)
+    PWMscoreStartingAt(virus.pwm, subject.fasta[[i]], starting.at = 1:99)
   
-  d.dataframe = cbind(d.dataframe, scores)
+  pwm.score.dataframe = cbind(pwm.score.dataframe, scores)
   
   #  }
 }
 
 #check if sequence in R is the same as in genbank and after Python Extraction
 
-write.table(d.dataframe, file = "human_with_rna.csv")
+write.table(pwm.score.dataframe, file = "viralpwm_with_humanrna.csv")
 
 
 
@@ -68,18 +68,18 @@ write.table(d.dataframe, file = "human_with_rna.csv")
 #starndard devation per row
 
 
-d.dataframe$means <- rowMeans(d.dataframe, na.rm = TRUE)
-d.dataframe$meanplussd <- (d.dataframe$means + 0.1959341)
-d.dataframe$meanminussd <- (d.dataframe$means - 0.1959341)
+pwm.score.dataframe$means <- rowMeans(pwm.score.dataframe, na.rm = TRUE)
+pwm.score.dataframe$meanplussd <- (pwm.score.dataframe$means + 0.1959341)
+pwm.score.dataframe$meanminussd <- (pwm.score.dataframe$means - 0.1959341)
 
-plot(1, d.dataframe[1])
+plot(1, pwm.score.dataframe[1])
 
 
 #unifrom
 
-plot(1:99, d.dataframe[1:99])
+plot(1:99, pwm.score.dataframe[1:99])
 
-colnames(d.dataframe)
+colnames(pwm.score.dataframe)
 
 ggplot(data = df, aes(x = x, y = val)) + geom_line(aes(colour = variable))
 
