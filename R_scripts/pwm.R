@@ -14,45 +14,45 @@
 
 library(Biostrings)
 
-virus = readDNAStringSet('annotated_extracted_TIS_viral_30upstream_.CDS.TIS.fasta')
-virus.kozak = DNAStringSet(virus)
-virus.cons   = consensusString(virus.kozak)
-virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
+# virus = readDNAStringSet('annotated_extracted_TIS_viral_30upstream_.CDS.TIS.fasta')
+# virus.kozak = DNAStringSet(virus)
+# virus.cons   = consensusString(virus.kozak)
+# virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
 #make a pwm of size 13
 human = readDNAStringSet('annotated_extracted_TIS_rna_30upstream_.CDS.TIS.fasta')
 human.kozak = DNAStringSet(human)
-human.cons   = consensusString(human.kozak)
 human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
-subject.fasta = readDNAStringSet('rna_30upstream_.CDS.fasta')
+query = readDNAStringSet('viral_30upstream_.CDS.fasta')
 
-#print(PWMscoreStartingAt(human.pwm, subject.fasta[[1]], starting.at = 99))
+#print(PWMscoreStartingAt(human.pwm, query[[1]], starting.at = 99))
+
 
 #loop through ever single element
-pwm.score.dataframe = NULL
+pwm.scores = NULL
 
-print(length(subject.fasta))
+print(length(query))
 
-for (i in 1:length(subject.fasta)) {
-  # seq_length <- length(subject.fasta[[i]])
-  #
-  # integer.vector <- 1:seq_length
+for (i in 1:length(query)) {
+  #if (grepl("Scanning", query@ranges@NAMES[i]) == TRUE) {
+  score <-
+    PWMscoreStartingAt(human.pwm, query[[i]], starting.at = 1:99)
   
-  #if (grepl("IRES", subject.fasta@ranges@NAMES[i]) == TRUE){
+  pwm.scores = cbind(pwm.scores, score)
   
-  scores <-
-    PWMscoreStartingAt(virus.pwm, subject.fasta[[i]], starting.at = 1:99)
-  
-  pwm.score.dataframe = cbind(pwm.score.dataframe, scores)
-  
-  #  }
+  #}
 }
 
-#check if sequence in R is the same as in genbank and after Python Extraction
+pwm.score.means <- rowMeans(pwm.scores)
 
-write.table(pwm.score.dataframe, file = "viralpwm_with_humanrna.csv")
-
+plot(
+  pwm.score.means,
+  type = "l",
+  xlab = "position",
+  ylab = "PWM Score",
+  main = ""
+)
 
 
 #pick particular virus
@@ -68,103 +68,67 @@ write.table(pwm.score.dataframe, file = "viralpwm_with_humanrna.csv")
 #starndard devation per row
 
 
-pwm.score.dataframe$means <- rowMeans(pwm.score.dataframe, na.rm = TRUE)
-pwm.score.dataframe$meanplussd <- (pwm.score.dataframe$means + 0.1959341)
-pwm.score.dataframe$meanminussd <- (pwm.score.dataframe$means - 0.1959341)
-
-plot(1, pwm.score.dataframe[1])
 
 
-#unifrom
-
-plot(1:99, pwm.score.dataframe[1:99])
-
-colnames(pwm.score.dataframe)
-
-ggplot(data = df, aes(x = x, y = val)) + geom_line(aes(colour = variable))
-
-
-
-#gives length of sequence
-print (length(subject.fasta[[1]]))
-
-print (subject.fasta@ranges@width)
-
-
-
-
-print(slotNames(subject.fasta))
-
-str(subject.fasta)
-getSlots(subject.fasta@ranges)
-
-subject.fasta@ranges@NAMES
-
+# ## Use human PWM to score viral seqs
+# ## size of kozak sequence
+# ## score only the beginning 336 bps (same as internal atg file)
+# ksize = 13
+# max.len = 336 - ksize + 1
+# seqfiles = c('')
+# outfiles = c('viral_orf_u36.tsv', 'viral_internal_atg.tsv')
+# #seqfiles = c('viral_test.fasta','test_internal.fasta')
+# #outfiles = c('viral_test.tsv','test_internal.tsv')
 #
-# for each name in subject.fasta
-#   PWMscoreStartingAt(human.pwm, subject.fasta$name, starting.at = 1:<user defined length?>
 #
-
-
-## Use human PWM to score viral seqs
-## size of kozak sequence
-## score only the beginning 336 bps (same as internal atg file)
-ksize = 13
-max.len = 336 - ksize + 1
-seqfiles = c('')
-outfiles = c('viral_orf_u36.tsv', 'viral_internal_atg.tsv')
-#seqfiles = c('viral_test.fasta','test_internal.fasta')
-#outfiles = c('viral_test.tsv','test_internal.tsv')
-
-
-for (idx in 1:length(seqfiles)) {
-  fname = seqfiles[idx]
-  print(fname)
-  
-  virus = readDNAStringSet(fname)
-  all.scores = c()
-  all.scores.rownames = c()
-  
-  for (i in 1:length(virus)) {
-    s.name = names(virus[i])
-    print(s.name)
-    s = virus[[i]]
-    
-    if ((length(s) - ksize + 1) >= max.len) {
-      all.scores.rownames = c(all.scores.rownames, names(virus[i]))
-      
-      s.scores = c()
-      
-      for (st in 1:max.len) {
-        score = PWMscoreStartingAt(hs.pwm, s[st:(st + ksize - 1)])
-        s.scores = c(s.scores, score)
-      }
-      
-      all.scores = rbind(all.scores, s.scores)
-    }
-  }
-  pos.names = c(seq(-27,-1, 1), seq(1, 297, 1))
-  colnames(all.scores) = pos.names
-  rownames(all.scores) = all.scores.rownames
-  write.table(all.scores,
-              file = outfiles[idx],
-              col.names = T,
-              sep = '\t')
-}
-
-
-## Plot graphs
-real = read.table(outfiles[1], head = T, sep = '\t')
-internal = read.table(outfiles[2], head = T, sep = '\t')
-plot(
-  colMeans(real),
-  xlab = 'Position from ATG',
-  ylim = c(0, 1),
-  ylab = 'PWM scores',
-  type = 'l',
-  axes = F
-)
-pos.names = c(seq(-27,-1, 10), seq(1, 297, 10))
-axis(side = 1, at = pos.names)
-axis(side = 2, at = seq(0, 1, 0.1))
-#lines(colMeans(internal),col='blue')
+# for (idx in 1:length(seqfiles)) {
+#   fname = seqfiles[idx]
+#   print(fname)
+#
+#   virus = readDNAStringSet(fname)
+#   all.scores = c()
+#   all.scores.rownames = c()
+#
+#   for (i in 1:length(virus)) {
+#     s.name = names(virus[i])
+#     print(s.name)
+#     s = virus[[i]]
+#
+#     if ((length(s) - ksize + 1) >= max.len) {
+#       all.scores.rownames = c(all.scores.rownames, names(virus[i]))
+#
+#       s.scores = c()
+#
+#       for (st in 1:max.len) {
+#         score = PWMscoreStartingAt(hs.pwm, s[st:(st + ksize - 1)])
+#         s.scores = c(s.scores, score)
+#       }
+#
+#       all.scores = rbind(all.scores, s.scores)
+#     }
+#   }
+#   pos.names = c(seq(-27,-1, 1), seq(1, 297, 1))
+#   colnames(all.scores) = pos.names
+#   rownames(all.scores) = all.scores.rownames
+#   write.table(all.scores,
+#               file = outfiles[idx],
+#               col.names = T,
+#               sep = '\t')
+# }
+#
+#
+# ## Plot graphs
+# real = read.table(outfiles[1], head = T, sep = '\t')
+# internal = read.table(outfiles[2], head = T, sep = '\t')
+# plot(
+#   colMeans(real),
+#   xlab = 'Position from ATG',
+#   ylim = c(0, 1),
+#   ylab = 'PWM scores',
+#   type = 'l',
+#   axes = F
+# )
+# pos.names = c(seq(-27,-1, 10), seq(1, 297, 10))
+# axis(side = 1, at = pos.names)
+# axis(side = 2, at = seq(0, 1, 0.1))
+# #lines(colMeans(internal),col='blue')
