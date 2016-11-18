@@ -26,6 +26,9 @@ warnings.filterwarnings('error')
 
 num_bp_upstreamcds = int(sys.argv[1])
 
+#num bp downstream to grab
+num_bp_downstreamcds = int(sys.argv[2])
+
 
 def validate_cds(record, feature):
     feature_validity = None
@@ -81,23 +84,31 @@ def get_upstream_cds(fullpath, filename):
                         # create a SeqFeature object containing the location of where to extract
                         # need to test if its taking + or - 1 off the location
                         # genbank starts with 1
-                        upstream_and_cds = SeqFeature(FeatureLocation(
-                            cds_start - num_bp_upstreamcds, cds_end))
-                        extracted_upstream_and_cds = upstream_and_cds.extract(
-                            record)
+                        upstream_cds_downstream = SeqFeature(FeatureLocation(cds_start - num_bp_upstreamcds, cds_end + num_bp_downstreamcds))
+                        
+                        
+                        #need to check if complement
+                        if feature.location_operator == "complement
+                        
+                        
+                        extracted_seq = upstream_cds_downstream.extract(record)
 
                         # only used for length culling
-                        upstream_only = SeqFeature(FeatureLocation(
-                            cds_start - num_bp_upstreamcds, cds_start))
+                        
+                        upstream_only = SeqFeature(FeatureLocation(cds_start - num_bp_upstreamcds, cds_start))
+                        
+                        downstream_only = SeqFeature(FeatureLocation(cds_end, cds_end + num_bp_downstreamcds)
+                        
                         extracted_upstream_only = upstream_only.extract(record)
+                        extracted_downstream_only = downstream_only.extract(record)
+                        
 
                         cds_protein_id = str(feature.qualifiers.get(
                             'protein_id')).strip('\'[]')
 
-                        if len(extracted_upstream_only.seq) == num_bp_upstreamcds:
+                        if len(extracted_upstream_only.seq) == num_bp_upstreamcds and len(extracted_downstream_only.seq) == num_bp_downstreamcds:
 
-                            annotated_record = SeqRecord(
-                                extracted_upstream_and_cds.seq, extracted_upstream_and_cds.name, description="|" + cds_protein_id + "|")
+                            annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
 
                             extracted_cds_list.append(annotated_record)
 
