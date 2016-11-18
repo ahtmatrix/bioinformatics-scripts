@@ -13,6 +13,7 @@
 #  Whereas, viral genes using other mechanisms should not show a peak. Fingers crossed!
 
 library(Biostrings)
+library(matrixStats)
 
 # virus = readDNAStringSet('annotated_extracted_TIS_viral_30upstream_.CDS.TIS.fasta')
 # virus.kozak = DNAStringSet(virus)
@@ -45,6 +46,14 @@ for (i in 1:length(query)) {
 }
 
 pwm.score.means <- rowMeans(pwm.scores)
+
+means <- rowMeans(pwm.scores)
+stds<- rowSds(pwm.scores)
+
+plot(means, type = "l", ylim = c(0, 1))
+points(means+stds, type = "l" )
+points(means-stds, type = "l")
+
 
 plot(
   pwm.score.means,
