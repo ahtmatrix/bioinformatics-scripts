@@ -19,7 +19,7 @@ for row in reader:
 # dictionary[new_key] = dictionary[old_key]
 # del dictionary[old_key]
 
-
+#replaces the accession number with the accession version
 def fix_accession(fullpath, filename):
 
     for record in SeqIO.parse(fullpath, "genbank"):
