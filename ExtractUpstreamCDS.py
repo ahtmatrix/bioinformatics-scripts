@@ -87,17 +87,17 @@ def get_upstream_cds(fullpath, filename):
                         upstream_cds_downstream = SeqFeature(FeatureLocation(cds_start - num_bp_upstreamcds, cds_end + num_bp_downstreamcds))
                         
                         
-                        #need to check if complement
-                        if feature.location_operator == "complement
-                        
-                        
                         extracted_seq = upstream_cds_downstream.extract(record)
-
+                        
+                        #need to check if complement
+                        if "-" in str(feature.location):
+                            extracted_seq = extracted_seq.reverse_complement()
+                        
                         # only used for length culling
                         
                         upstream_only = SeqFeature(FeatureLocation(cds_start - num_bp_upstreamcds, cds_start))
                         
-                        downstream_only = SeqFeature(FeatureLocation(cds_end, cds_end + num_bp_downstreamcds)
+                        downstream_only = SeqFeature(FeatureLocation(cds_end, cds_end + num_bp_downstreamcds))
                         
                         extracted_upstream_only = upstream_only.extract(record)
                         extracted_downstream_only = downstream_only.extract(record)
