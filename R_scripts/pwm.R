@@ -21,24 +21,24 @@ library(matrixStats)
 # virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
 #make a pwm of size 13
-human = readDNAStringSet('annotated_extracted_TIS_rna_30upstream_.CDS.TIS.fasta')
+human = readDNAStringSet('rna_30upstream_.CDS.fasta')
+subseq(human, start = 22, end= 34)
 human.kozak = DNAStringSet(human)
-human.pwm    = PWM(human.kozak, type = 'log2probratio')
+human.pwm    = PWM(subseq(human, start = 22, end= 34), type = 'log2probratio')
 
-query = readDNAStringSet('viral_30upstream_.CDS.fasta')
+query = readDNAStringSet('test.fasta')
 
 #print(PWMscoreStartingAt(human.pwm, query[[1]], starting.at = 99))
+
+PWMscoreStartingAt(human.pwm, query[[]], starting.at = 1:40)
 
 
 #loop through ever single element
 pwm.scores = NULL
 
-print(length(query))
-
 for (i in 1:length(query)) {
   #if (grepl("Scanning", query@ranges@NAMES[i]) == TRUE) {
-  score <-
-    PWMscoreStartingAt(human.pwm, query[[i]], starting.at = 1:99)
+  score <- PWMscoreStartingAt(human.pwm, query[[i]], starting.at = 1:40)
   
   pwm.scores = cbind(pwm.scores, score)
   
@@ -48,11 +48,11 @@ for (i in 1:length(query)) {
 pwm.score.means <- rowMeans(pwm.scores)
 
 means <- rowMeans(pwm.scores)
-stds<- rowSds(pwm.scores)
+stds <- rowSds(pwm.scores)
 
 plot(means, type = "l", ylim = c(0, 1))
-points(means+stds, type = "l" )
-points(means-stds, type = "l")
+points(means + stds, type = "l")
+points(means - stds, type = "l")
 
 
 plot(

@@ -67,52 +67,161 @@ barplot(
 #change the start position to get different frames
 
 
+
+count <- 0
+for (i in 1:length(human)) {
+  if (subseq(human[i], start = 10, end = 12) == "ATG") {
+    count = count + 1
+  } else {
+    subseq(human[i], start = 10, end = 12)
+  }
+}
+count
+
+
+
+count <- 0
+for (i in 1:length(query)) {
+  if (subseq(query[i], start = 31, end = 33) == "ATG") {
+    count = count + 1
+  } else {
+    subseq(query[i], start = 31, end = 33)
+  }
+}
+count
+
+
+
+
+
+
+
+
+test = readDNAStringSet('test.fasta')
+
+stop.codon.count <- 0
+start.codon.count <- 0
+
+errors <- NULL
+for (i in 1:length(test)) {
+  
+  stop.codon.subseq <-subseq(test[i],start = test@ranges@width[i] - 32,end = test@ranges@width[i] - 30)
+  
+  atg.codon.subseq <- subseq(test[i], start = 31, end = 33)
+  
+  if (stop.codon.subseq == "TAA" || stop.codon.subseq == "TAG" || stop.codon.subseq == "TGA") {
+    stop.codon.count = stop.codon.count + 1
+  } else {
+    errors <- rbind(errors, test@ranges@NAMES[i])
+  }
+  
+  if (atg.codon.subseq == "ATG") {
+    start.codon.count = start.codon.count + 1
+  } else {
+    errors <- rbind(errors, test@ranges@NAMES)
+  }
+  
+}
+
+
+i = 1:99
+subseq(test[i],
+       start = test@ranges@width[i] - 32,
+       end = test@ranges@width[i] - 30)
+
+
+
+
+#checks if the query length may be too short
+count <- 0
+short.count <- 0
+for (i in 1:length(query)) {
+  if (query@ranges@width[i] < 99) {
+    short.count = short.count + 1
+  } else if (query@ranges@width[i] > 99) {
+    count = count + 1
+  }
+}
+
+
+
+all.data.frame = NULL
 query = readDNAStringSet('viral_30upstream_.CDS.fasta')
 
-for(i in 1:3){
-#1 2 or 3 frame changer
-frame = 2
-#----------------------
-#calculate diNT freq of after start to 99
-frame.start.pos = 33
+for (i in 1:3) {
+  #1 2 or 3 frame changer
+  frame = i
+  #----------------------
+  #calculate diNT freq of after start to 99
+  frame.start.pos = 33
+  
+  #allows easy change of frame
+  subseq.start = frame.start.pos + frame
+  
+  #make a subsequence starting after start codon and ending at 99
+  after.start.seq = subseq(query, start = subseq.start, end = 99)
+  
+  #calculates diNT freq of every +<frame> position until end = 99
+  after.start.diNT.freq <-
+    dinucleotideFrequency(after.start.seq, step = 3)
+  
+  #sum all frequencies
+  totals.after.start.diNT.freq <- colSums(after.start.diNT.freq)
+  
+  sum(totals.after.start.diNT.freq)
+  
+  
+  #num.codons.after.start[1] = floor(after.start.seq@ranges@width / 3)+1
+  
+  #-----------------------
+  #calculate diNT freq of full length sequence WITHOUT START AND WITHOUT STOP
+  
+  #filter out the start and stop codon from full length sequences
+  
+  no.start.stop.full.seq <-
+    xscat(
+      subseq(query, start = frame, end = 30),
+      subseq(query, start = 34, end = query@ranges@width - 3)
+    )
+  
+  no.start.stop.full.seq.diNT.freq <-
+    dinucleotideFrequency(no.start.stop.full.seq)
+  
+  totals.no.start.stop.full.seq.diNT.freq <-
+    colSums(no.start.stop.full.seq.diNT.freq)
+  sum(totals.no.start.stop.full.seq.diNT.freq)
+  #diNT.freq.means <- totals.after.start.diNT.freq/totals.no.start.stop.full.diNT.freq
+  
+  #diNT.freq.means <-scale(totals.after.start.diNT.freq)/scale(totals.no.start.stop.full.seq.diNT.freq)
+  
+  #num.codons.full <- floor(no.start.stop.full.seq@ranges@width / 3)
+  
+  norm.fact <-
+    (
+      sum(totals.after.start.diNT.freq) / sum(totals.no.start.stop.full.seq.diNT.freq)
+    )
+  
+  final.means <-
+    log10(
+      totals.after.start.diNT.freq / (totals.no.start.stop.full.seq.diNT.freq *
+                                        norm.fact)
+    )
+  
+  barplot(final.means, main = paste(c("frame = +"), frame))
+  
+  
+}
 
-#allows easy change of frame
-subseq.start = frame.start.pos+frame
-
-#make a subsequence starting after start codon and ending at 99
-after.start.diNT.freq = subseq(query, start = subseq.start, end = 99)
-
-#calculates diNT freq of every +<frame> position until end = 99
-diNT.freq <- dinucleotideFrequency(after.start.diNT.freq, step = 3)
-
-#sum all frequencies
-totals.after.start.diNT.freq <- colSums(diNT.freq)
-
-scale(totals.after.start.diNT.freq)
+data <-
+  data.frame(
+    time = seq(0, 23),
+    noob = rnorm(24),
+    plus = runif(24),
+    extra = rpois(24, lambda = 1)
+  )
 
 
-
-#-----------------------
-#calculate diNT freq of full length sequence WITHOUT START AND WITHOUT STOP
-
-#filter out the start and stop codon from full length sequences
-
-no.start.stop.full <- xscat(subseq(query, start = frame, end = 30), subseq(query, start = 34, end = query@ranges@width-3))
-
-no.start.stop.full.diNT.freq <- dinucleotideFrequency(no.start.stop.full, step = 3)
-
-totals.no.start.stop.full.diNT.freq <-colSums(no.start.stop.full.diNT.freq)
-
-#need to normalize denominator
-
-scale(totals.no.start.stop.full.diNT.freq)
+barplot(all.da, main = paste(c("frame = +"), frame))
 
 
-
-
-diNT.freq.means <- scale(totals.after.start.diNT.freq)/scale(totals.no.start.stop.full.diNT.freq)
-
-
-
-plot(log10(diNT.freq.means), main = paste(c("frame = +"), frame))
-
+par
