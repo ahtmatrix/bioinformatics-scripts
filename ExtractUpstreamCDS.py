@@ -61,7 +61,7 @@ def validate_cds(record, feature):
     return feature_validity
 
 
-def get_upstream_cds(fullpath, filename):
+def extract_sequence(fullpath, filename):
 
     extracted_cds_list = []
 
@@ -117,4 +117,4 @@ for files in raw_datadir_listing:
     if files.endswith('.gbk'):
         full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
-        get_upstream_cds(full_path, filename)
+        extract_sequence(full_path, filename)
