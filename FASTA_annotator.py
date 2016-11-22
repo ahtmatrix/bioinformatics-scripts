@@ -47,11 +47,11 @@ raw_datadir_listing = os.listdir(os.getcwd())
 
 # loops over the list of files
 for files in raw_datadir_listing:
-    if files.startswith('extracted_TIS_viral'):
+    if files.startswith('viral_30upstream_CDS'):
         full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
         set_viral_TIS(full_path, filename)
-    elif files.startswith('extracted_TIS_rna'):
-        full_path = os.path.join(os.getcwd(), files)
-        filename = os.path.splitext(files)[0]
-        set_rna_TIS(full_path, filename)
+    # if files.startswith('extracted_TIS_rna'):
+    #     full_path = os.path.join(os.getcwd(), files)
+    #     filename = os.path.splitext(files)[0]
+    #     set_rna_TIS(full_path, filename)

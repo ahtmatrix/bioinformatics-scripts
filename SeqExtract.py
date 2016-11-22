@@ -8,14 +8,14 @@ import warnings
 from Bio import BiopythonWarning
 
 # Usage
-# python ExtractUpstreamCDS.py [number of bases upstream to cut]
+# python SeqExtract.py [number of bases upstream to cut]
 
 # to combine multiple .gbk files into 1 gbk
 # navigate to directory containing gbk files
 # cat *.gbk > filename.gbk
 
 # python -m pdb -Werror myprogram.py to run and stop pdb at the warning
-# python -Werror -m pdb ExtractUpstreamCDS.py 30
+# python -Werror -m pdb SeqExtract.py 30
 # turns warnings into errors so it can be caught
 
 # grep '>' [filename] | wc -l
@@ -85,25 +85,63 @@ def extract_sequence(fullpath, filename):
                         extracted_3UTR = ThreeUTR_location.extract(record)
                         
                         
-                        #length checking of UTR
-                        if len(extracted_5UTR.seq) == num_bp_upstreamcds and len(extracted_3UTR.seq) == num_bp_downstreamcds:
-                            # create a SeqFeature object containing the location of where to extract
-                            # need to test if its taking + or - 1 off the location
-                            # genbank starts with 1
-                            upstream_cds_downstream_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location + num_bp_downstreamcds))
+                        #logic to determine which combinations of UTR to get
+                        
+                        #1 just 5UTR:  So if python SeqExtract.py 30 0, then it will only take -30 upstream CDS + CDS
+                        if   len(extracted_5UTR.seq) == num_bp_upstreamcds and num_bp_downstreamcds == 0:
+                            
+                            extract_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location))
+                        
                         
                             #need to check if complement
                             #if it is complemement, then reverse complement it
                             if "-" in str(feature.location):
-                                extracted_seq = upstream_cds_downstream_location.extract(record).reverse_complement()
+                                extracted_seq = extract_location.extract(record).reverse_complement()
                             else:
-                                #extract the sequence otherwise
-                                extracted_seq = upstream_cds_downstream_location.extract(record)
-                        
-
+                                    #extract the sequence otherwise
+                                extracted_seq = extract_location.extract(record)
+                                
+                                
                             cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
                             annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
                             extracted_cds_list.append(annotated_record)
+
+                        #2 just 3UTR: So if python SeqExtract.py 0 30, then it will only take +30 downstream of last stop in CDS + the entire CDS
+                        elif len(extracted_3UTR.seq) == num_bp_downstreamcds and num_bp_upstreamcds == 0:
+                            
+                            extract_location = SeqFeature(FeatureLocation(cds_start_location                     , cds_end_location + num_bp_downstreamcds))
+                        
+                            #need to check if complement
+                            #if it is complemement, then reverse complement it
+                            if "-" in str(feature.location):
+                                extracted_seq = extract_location.extract(record).reverse_complement()
+                            else:
+                                    #extract the sequence otherwise
+                                extracted_seq = extract_location.extract(record)
+                        
+                            cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
+                            annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
+                            extracted_cds_list.append(annotated_record)
+                        
+                        
+                        else:
+                            print "COMMAND INPUT ERROR: CHECK FIRST 2 ARGUMENTS"
+                            print "5UTR length = "+str(len(extracted_5UTR))
+                            print "3UTR length = "+str(len(extracted_3UTR))
+                        
+                        #if needed both 5UTR and 3UTR
+                        
+                        #length checking of UTR
+                #if len(extracted_5UTR.seq) == num_bp_upstreamcds and len(extracted_3UTR.seq) == num_bp_downstreamcds:
+                            # create a SeqFeature object containing the location of where to extract
+                            # need to test if its taking + or - 1 off the location
+                            # genbank starts with 1
+                #upstream_cds_downstream_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location + num_bp_downstreamcds))
+                        
+                        
+                        
+
+                        
 
     # extraction is using the GENBANK protein for all
     SeqIO.write(extracted_cds_list, filename + "_" +str(num_bp_upstreamcds) + "upstream_" + "CDS_"+str(num_bp_downstreamcds)+"downstream.fasta", "fasta")
