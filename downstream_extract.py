@@ -81,18 +81,20 @@ def extract_upstream_of_STOP_and_downstream_of_stop(fullpath, filename):
                         
                         if len(extracted_3UTR.seq) == num_bp_downstreamSTOP:
                             
-                            #extract -num_bp_upstreamSTOP + STOP + num_bp_downstreamSTOP    
-                            extract_location = SeqFeature(FeatureLocation(cds_end_location- num_bp_upstreamSTOP, cds_end_location + num_bp_downstreamSTOP))
-                        
+                            
                             #need to check if complement
                             #if it is complemement, then reverse complement it
                             
                             if "+" in str(feature.location):
+                                #extract -num_bp_upstreamSTOP + STOP + num_bp_downstreamSTOP    
+                                extract_location = SeqFeature(FeatureLocation(cds_end_location- num_bp_upstreamSTOP, cds_end_location + num_bp_downstreamSTOP))
+                        
                                 extracted_seq = extract_location.extract(record)
                                 #print "reverse complement disengaged" + str(feature.location)
                                 
                             elif "-" in str(feature.location):
-                                extracted_seq = extract_location.extract(record).reverse_complement()
+                                rc_extract_location = SeqFeature(FeatureLocation(cds_end_location+ num_bp_downstreamSTOP, cds_end_location - num_bp_upstreamSTOP))
+                                extracted_seq = rc_extract_location.extract(record).reverse_complement()
                                 #print "reverse complement engaged   " + str(feature.location)
                                 
                             cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
