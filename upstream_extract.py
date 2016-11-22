@@ -25,10 +25,6 @@ warnings.filterwarnings('error')
 #number of base pairs upstream to extract
 num_bp_upstreamcds = int(sys.argv[1])
 
-#number of base pairs downstream of the cds to extract
-num_bp_downstreamcds = int(sys.argv[2])
-
-
 def validate_cds(record, feature):
     feature_validity = None
 
@@ -61,7 +57,7 @@ def validate_cds(record, feature):
     return feature_validity
 
 
-def extract_sequence(fullpath, filename):
+def extract_upstream_and_CDS(fullpath, filename):
 
     extracted_cds_list = []
 
@@ -79,72 +75,34 @@ def extract_sequence(fullpath, filename):
                         #get the 5'UTR sequence coordinate and extract
                         FiveUTR_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_start_location))
                         extracted_5UTR = FiveUTR_location.extract(record)
+                 
+                        if len(extracted_5UTR.seq) == num_bp_upstreamcds:
                             
-                        #get the 3'UTR sequence coordinates and extract
-                        ThreeUTR_location = SeqFeature(FeatureLocation(cds_end_location, cds_end_location + num_bp_downstreamcds))
-                        extracted_3UTR = ThreeUTR_location.extract(record)
-                        
-                        
-                        #logic to determine which combinations of UTR to get
-                        
-                        #1 just 5UTR:  So if python SeqExtract.py 30 0, then it will only take -30 upstream CDS + CDS
-                        if   len(extracted_5UTR.seq) == num_bp_upstreamcds and num_bp_downstreamcds == 0:
-                            
+                            #extract -num_bp_upstreamcds + the whole CDS
                             extract_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location))
-                        
                         
                             #need to check if complement
                             #if it is complemement, then reverse complement it
-                            if "-" in str(feature.location):
-                                extracted_seq = extract_location.extract(record).reverse_complement()
-                            else:
-                                    #extract the sequence otherwise
+                            
+                            if "+" in str(feature.location):
                                 extracted_seq = extract_location.extract(record)
+                                print "reverse complement disengaged" + str(feature.location)
                                 
+                            elif "-" in str(feature.location):
+                                extracted_seq = extract_location.extract(record).reverse_complement()
+                                print "reverse complement engaged   " + str(feature.location)
                                 
                             cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
                             annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
                             extracted_cds_list.append(annotated_record)
 
-                        #2 just 3UTR: So if python SeqExtract.py 0 30, then it will only take +30 downstream of last stop in CDS + the entire CDS
-                        elif len(extracted_3UTR.seq) == num_bp_downstreamcds and num_bp_upstreamcds == 0:
-                            
-                            extract_location = SeqFeature(FeatureLocation(cds_start_location                     , cds_end_location + num_bp_downstreamcds))
-                        
-                            #need to check if complement
-                            #if it is complemement, then reverse complement it
-                            if "-" in str(feature.location):
-                                extracted_seq = extract_location.extract(record).reverse_complement()
-                            else:
-                                    #extract the sequence otherwise
-                                extracted_seq = extract_location.extract(record)
-                        
-                            cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
-                            annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
-                            extracted_cds_list.append(annotated_record)
-                        
-                        
-                        else:
-                            print "COMMAND INPUT ERROR: CHECK FIRST 2 ARGUMENTS"
-                            print "5UTR length = "+str(len(extracted_5UTR))
-                            print "3UTR length = "+str(len(extracted_3UTR))
-                        
-                        #if needed both 5UTR and 3UTR
-                        
-                        #length checking of UTR
-                #if len(extracted_5UTR.seq) == num_bp_upstreamcds and len(extracted_3UTR.seq) == num_bp_downstreamcds:
                             # create a SeqFeature object containing the location of where to extract
                             # need to test if its taking + or - 1 off the location
                             # genbank starts with 1
                 #upstream_cds_downstream_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location + num_bp_downstreamcds))
-                        
-                        
-                        
-
-                        
 
     # extraction is using the GENBANK protein for all
-    SeqIO.write(extracted_cds_list, filename + "_" +str(num_bp_upstreamcds) + "upstream_" + "CDS_"+str(num_bp_downstreamcds)+"downstream.fasta", "fasta")
+    SeqIO.write(extracted_cds_list, filename + str(num_bp_upstreamcds)+"upstream_and_CDS.fasta", "fasta")
     return
 
 # creates a list of the files in this directory
@@ -155,4 +113,4 @@ for files in raw_datadir_listing:
     if files.endswith('.gbk'):
         full_path = os.path.join(os.getcwd(), files)
         filename = os.path.splitext(files)[0]
-        extract_sequence(full_path, filename)
+        extract_upstream_and_CDS(full_path, filename)
