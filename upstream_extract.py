@@ -86,11 +86,11 @@ def extract_upstream_and_CDS(fullpath, filename):
                             
                             if "+" in str(feature.location):
                                 extracted_seq = extract_location.extract(record)
-                                print "reverse complement disengaged" + str(feature.location)
+                                #print "reverse complement disengaged" + str(feature.location)
                                 
                             elif "-" in str(feature.location):
                                 extracted_seq = extract_location.extract(record).reverse_complement()
-                                print "reverse complement engaged   " + str(feature.location)
+                                #print "reverse complement engaged   " + str(feature.location)
                                 
                             cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
                             annotated_record = SeqRecord(extracted_seq.seq, extracted_seq.name, description="|" + cds_protein_id + "|")
