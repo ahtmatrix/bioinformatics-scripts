@@ -78,18 +78,19 @@ def extract_upstream_and_CDS(fullpath, filename):
                  
                         if len(extracted_5UTR.seq) == num_bp_upstreamcds:
                             
-                            #extract -num_bp_upstreamcds + the whole CDS
-                            extract_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location))
-                        
                             #need to check if complement
                             #if it is complemement, then reverse complement it
                             
                             if "+" in str(feature.location):
+                                #extract -num_bp_upstreamcds + the whole CDS #THIS LOCATION HAS TO BE DIFFERENT
+                                extract_location = SeqFeature(FeatureLocation(cds_start_location - num_bp_upstreamcds, cds_end_location))
                                 extracted_seq = extract_location.extract(record)
                                 #print "reverse complement disengaged" + str(feature.location)
                                 
                             elif "-" in str(feature.location):
-                                extracted_seq = extract_location.extract(record).reverse_complement()
+                            
+                                rc_extract_location = SeqFeature(FeatureLocation(cds_start_location, cds_end_location+ num_bp_upstreamcds))
+                                extracted_seq = rc_extract_location.extract(record).reverse_complement()
                                 #print "reverse complement engaged   " + str(feature.location)
                                 
                             cds_protein_id = str(feature.qualifiers.get('protein_id')).strip('\'[]')
