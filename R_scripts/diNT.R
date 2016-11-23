@@ -68,67 +68,32 @@ barplot(
 
 
 
-count <- 0
-for (i in 1:length(human)) {
-  if (subseq(human[i], start = 10, end = 12) == "ATG") {
-    count = count + 1
-  } else {
-    subseq(human[i], start = 10, end = 12)
-  }
-}
-count
 
-
-
-count <- 0
-for (i in 1:length(query)) {
-  if (subseq(query[i], start = 31, end = 33) == "ATG") {
-    count = count + 1
-  } else {
-    subseq(query[i], start = 31, end = 33)
-  }
-}
-count
-
-
-
-
-
-
-
-
-test = readDNAStringSet('test.fasta')
-
+#----------------------------TESTS IF THE START CODON AND STOP COODN IS IN THE RIGHT PLACE
+test = readDNAStringSet('rna30upstream_and_CDS.fasta')
 stop.codon.count <- 0
 start.codon.count <- 0
-
-errors <- NULL
+start.errors <- NULL
+stop.errors <- NULL
 for (i in 1:length(test)) {
   
-  stop.codon.subseq <-subseq(test[i],start = test@ranges@width[i] - 32,end = test@ranges@width[i] - 30)
   
   atg.codon.subseq <- subseq(test[i], start = 31, end = 33)
   
-  if (stop.codon.subseq == "TAA" || stop.codon.subseq == "TAG" || stop.codon.subseq == "TGA") {
-    stop.codon.count = stop.codon.count + 1
-  } else {
-    errors <- rbind(errors, test@ranges@NAMES[i])
-  }
+  stop.codon.subseq <-subseq(test[i],start = test@ranges@width[i]-2,end = test@ranges@width[i])
   
   if (atg.codon.subseq == "ATG") {
     start.codon.count = start.codon.count + 1
   } else {
-    errors <- rbind(errors, test@ranges@NAMES)
+    start.errors <- rbind(start.errors, toString(atg.codon.subseq))
   }
   
+  if (stop.codon.subseq == "TAA" || stop.codon.subseq == "TAG" || stop.codon.subseq == "TGA") {
+    stop.codon.count = stop.codon.count + 1
+  } else {
+    stop.errors <- rbind(stop.errors, toString(stop.codon.subseq))
+  }
 }
-
-
-i = 1:99
-subseq(test[i],
-       start = test@ranges@width[i] - 32,
-       end = test@ranges@width[i] - 30)
-
 
 
 
@@ -146,7 +111,9 @@ for (i in 1:length(query)) {
 
 
 all.data.frame = NULL
-query = readDNAStringSet('viral_30upstream_.CDS.fasta')
+query = readDNAStringSet('rna30upstream_and_CDS.fasta')
+
+smallest.seq <- min(query@ranges@width)
 
 for (i in 1:3) {
   #1 2 or 3 frame changer
@@ -159,11 +126,10 @@ for (i in 1:3) {
   subseq.start = frame.start.pos + frame
   
   #make a subsequence starting after start codon and ending at 99
-  after.start.seq = subseq(query, start = subseq.start, end = 99)
+  after.start.seq = subseq(query, start = subseq.start, end = query@ranges@width - 3)
   
   #calculates diNT freq of every +<frame> position until end = 99
-  after.start.diNT.freq <-
-    dinucleotideFrequency(after.start.seq, step = 3)
+  after.start.diNT.freq <-dinucleotideFrequency(after.start.seq, step = 3)
   
   #sum all frequencies
   totals.after.start.diNT.freq <- colSums(after.start.diNT.freq)
@@ -178,14 +144,9 @@ for (i in 1:3) {
   
   #filter out the start and stop codon from full length sequences
   
-  no.start.stop.full.seq <-
-    xscat(
-      subseq(query, start = frame, end = 30),
-      subseq(query, start = 34, end = query@ranges@width - 3)
-    )
+  no.start.stop.full.seq <-subseq(query, start = 34, end = query@ranges@width - 3)
   
-  no.start.stop.full.seq.diNT.freq <-
-    dinucleotideFrequency(no.start.stop.full.seq)
+  no.start.stop.full.seq.diNT.freq <-dinucleotideFrequency(no.start.stop.full.seq)
   
   totals.no.start.stop.full.seq.diNT.freq <-
     colSums(no.start.stop.full.seq.diNT.freq)
@@ -219,9 +180,3 @@ data <-
     plus = runif(24),
     extra = rpois(24, lambda = 1)
   )
-
-
-barplot(all.da, main = paste(c("frame = +"), frame))
-
-
-par

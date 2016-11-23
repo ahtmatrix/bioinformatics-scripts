@@ -21,38 +21,39 @@ library(matrixStats)
 # virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
 #make a pwm of size 13
-human = readDNAStringSet('rna_30upstream_.CDS.fasta')
-subseq(human, start = 22, end= 34)
-human.kozak = DNAStringSet(human)
-human.pwm    = PWM(subseq(human, start = 22, end= 34), type = 'log2probratio')
+human = readDNAStringSet('rna30upstream_and_CDS.fasta')
+human.kozak = DNAStringSet(subseq(human, start = 22, end= 34))
+human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
-query = readDNAStringSet('test.fasta')
+query = readDNAStringSet('mm_mRNA_3end.fa')
 
 #print(PWMscoreStartingAt(human.pwm, query[[1]], starting.at = 99))
 
-PWMscoreStartingAt(human.pwm, query[[]], starting.at = 1:40)
-
+#smallest.sequence <- min(query@ranges@width)-13
 
 #loop through ever single element
 pwm.scores = NULL
 
+size.select = 120
+
 for (i in 1:length(query)) {
-  #if (grepl("Scanning", query@ranges@NAMES[i]) == TRUE) {
-  score <- PWMscoreStartingAt(human.pwm, query[[i]], starting.at = 1:40)
+  #atg.codon.subseq <- subseq(query[i], start = 31, end = 33)
   
+  if(query@ranges@width[i] > size.select){
+    #if (grepl("Scanning", query@ranges@NAMES[i]) == TRUE) {
+    
+  score <- PWMscoreStartingAt(human.pwm, query[[i]], starting.at = 1:100)
+  
+    #longest length the score can do is 168 b/c that is the shortest sequence
   pwm.scores = cbind(pwm.scores, score)
+  }
   
-  #}
 }
 
-pwm.score.means <- rowMeans(pwm.scores)
+pwm.score.means = rowMeans(pwm.scores)
 
-means <- rowMeans(pwm.scores)
-stds <- rowSds(pwm.scores)
-
-plot(means, type = "l", ylim = c(0, 1))
-points(means + stds, type = "l")
-points(means - stds, type = "l")
+# means <- rowMeans(pwm.scores)
+# stds <- rowSds(pwm.scores)
 
 
 plot(
@@ -60,8 +61,16 @@ plot(
   type = "l",
   xlab = "position",
   ylab = "PWM Score",
-  main = ""
+  main = "rna30upstream_and_CDS.fasta --> PWM with itself"
 )
+
+
+write.csv(pwm.score.means, "upstream.csv")
+
+# plot(means, type = "l", ylim = c(0, 1))
+# points(means + stds, type = "l")
+# points(means - stds, type = "l")
+
 
 
 #pick particular virus
