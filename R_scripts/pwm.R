@@ -20,12 +20,16 @@ library(matrixStats)
 # virus.cons   = consensusString(virus.kozak)
 # virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
+human.filename = "rna30upstream_and_CDS.fasta"
+query.filename = "rna30upstream_and_CDS.fasta"
+
+
 #make a pwm of size 13
-human = readDNAStringSet('rna30upstream_and_CDS.fasta')
+human = readDNAStringSet(human.filename)
 human.kozak = DNAStringSet(subseq(human, start = 22, end= 34))
 human.pwm    = PWM(human.kozak, type = 'log2probratio')
 
-query = readDNAStringSet('mm_mRNA_3end.fa')
+query = readDNAStringSet(query.filename)
 
 #print(PWMscoreStartingAt(human.pwm, query[[1]], starting.at = 99))
 
@@ -61,8 +65,10 @@ plot(
   type = "l",
   xlab = "position",
   ylab = "PWM Score",
-  main = "rna30upstream_and_CDS.fasta --> PWM with itself"
+  ylim = c(0.1, 0.8),
+  main =  paste(human.filename, "-->PWM-->", query.filename)
 )
+
 
 
 write.csv(pwm.score.means, "upstream.csv")
