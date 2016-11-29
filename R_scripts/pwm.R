@@ -21,7 +21,7 @@ library(matrixStats)
 # virus.pwm    = PWM(virus.kozak, type = 'log2probratio')
 
 human.filename = "rna30upstream_and_CDS.fasta"
-query.filename = "rna30upstream_and_CDS.fasta"
+query.filename = "finalviral.fasta"
 
 
 #make a pwm of size 13
@@ -71,7 +71,15 @@ plot(
 
 
 
-write.csv(pwm.score.means, "upstream.csv")
+write.csv(pwm.score.means, paste(human.filename, "-->PWM-->", query.filename))
+
+data1 <- read.csv("rna30upstream_and_CDS.fasta -->PWM--> rna30upstream_and_CDS.fasta")
+data2 <- read.csv("rna30upstream_and_CDS.fasta -->PWM--> finalviral.fasta")
+
+df <- cbind(data1$x, data2$x)
+
+plot(data1$x, type = "l")
+lines(data2$x)
 
 # plot(means, type = "l", ylim = c(0, 1))
 # points(means + stds, type = "l")
